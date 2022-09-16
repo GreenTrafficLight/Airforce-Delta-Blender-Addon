@@ -3,7 +3,7 @@ from .Utilities import *
 from .njhm import *
 from .njlm import *
 from .njtl import *
-import njhm
+from .njhm import *
 
 class POF0:
 
@@ -42,13 +42,13 @@ class POF0:
             njhm = NJHM()
             njhm.read(br)
 
-    def get_structure_order(self, br):
-        # WTF
-        header = br.bytesToString(br.readBytes(4)).replace("\0", "")
-        size = br.readUInt()
-        structure_order = ""
-        for i in range(size):
-            structure_order +=  br.bytesToString(br.readBytes(1)).replace("\0", "")
+            njhm.go_to_structure_letters(br)
+            
+                
+
+
+
+            
 
 
 
