@@ -14,7 +14,7 @@ class POF0:
 
         self.njtl_list = []
         self.njlm_list = []
-
+        self.njhm_list = []
     def read(self, br):
 
         self.header_size = br.readUInt()
@@ -41,8 +41,7 @@ class POF0:
         elif subheader == "NJHM":
             njhm = NJHM()
             njhm.read(br)
-
-            njhm.go_to_structure_letters(br)
+            self.njhm_list.append(njhm)
             
                 
 

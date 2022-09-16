@@ -31,5 +31,5 @@ class NNMH:
                 pof0.read(br)
                 self.pof0_list.append(pof0)
 
-            print(br.tell())
+            #print(br.tell())
 
