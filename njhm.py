@@ -18,7 +18,7 @@ class NJHM:
 
         def __init__(self) -> None:
             self.unk1 = 0
-            self.unk2 = 0
+            self.offset1 = 0 # offset to mesh table entry
             self.unk3 = 0
             self.unk4 = None
             self.unk5 = None
@@ -32,12 +32,23 @@ class NJHM:
             self.unk9 = 0
 
         def read(self, br):
+            """
             self.unk1 = br.readUInt()
             if self.unk1 != 8 and self.unk1 != 4:
-                self.unk2 = br.readUInt()
-                self.unk3 = br.readUInt()
+                self.offset1 = br.readUInt()
+                if self.offset1 != 0:
+                    self.unk3 = br.readUInt()
             self.unk4 = br.readUInt()
             self.unk5 = br.readUInt()
+            """
+            self.unk1 = br.readUInt()
+            self.offset1 = br.readUInt()
+            if self.offset1 != 0:
+                self.unk3 = br.readUInt()
+                self.unk4 = br.readUInt()
+                self.unk5 = br.readUInt()
+            elif self.offset1 == 0:
+                self.unk3 = br.readUInt()
             self.unk6 = (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
             self.unk7 = (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
             self.unk8 = (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())

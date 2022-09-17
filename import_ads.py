@@ -126,14 +126,14 @@ def build_njhm(njhm, njhm_index):
 
     for njhm_mesh in njhm.meshes:
 
-        """
+        
         if njhm_mesh[1] != []:
             empty = add_empty(str(mesh_index), ob, njhm_mesh[1][-1].translation, njhm_mesh[1][-1].rotation, njhm_mesh[1][-1].scale)
             empty.scale = njhm_mesh[1][-1].scale
         else:
             empty = add_empty(str(mesh_index), ob)
-        """
-        empty = add_empty(str(mesh_index), ob)
+        
+        #empty = add_empty(str(mesh_index), ob)
 
         mesh = bpy.data.meshes.new(str(mesh_index))
         obj = bpy.data.objects.new(str(mesh_index), mesh)
