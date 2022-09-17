@@ -47,23 +47,18 @@ class NJHM:
             self.stride = br.readUInt()
             self.face_buffer_offset = br.readUInt()
             self.unk10 = br.readUInt()
-            self.unk11 = br.readUInt()
+            self.vertex_buffer_offset = br.readUInt()
 
     class TRANSFORMATION_TABLE_ENTRY:
 
         def __init__(self) -> None:
             self.unk1 = 0
             self.unk2 = 0
-            self.unk3 = None
             self.rotation = None
             self.scale = None
-            self.unk6 = 0
-            self.unk7 = 0
-            self.unk8 = 0
-            self.unk9 = 0
-            self.unk10 = None
-            self.unk11 = 0
-            self.unk12 = 0
+            self.offset1 = 0
+            self.offset2 = 0
+            self.offset3 = 0
 
         def read(self, br):
             self.unk1 = br.readInt()
@@ -71,20 +66,10 @@ class NJHM:
             self.translation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.rotation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.scale = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
-
-            """
-            self.unk6 = br.readUInt()
-            self.unk7 = br.readUInt()
-            self.unk8 = br.readUInt()
-            self.unk9 = br.readUInt()
-            self.unk10 = (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
-            self.unk11 = br.readUInt()
-            self.unk12 = br.readUInt()
-            """
-            self.unk9 = br.readUInt() # If 0
-            self.unk11 = br.readUInt() # If 0
-            self.unk12 = br.readUInt()
-            if self.unk9 != 0:
+            self.offset1 = br.readUInt() # offset for the 20 unknowns float
+            self.offset2 = br.readUInt() # offset for child node ?
+            self.offset3 = br.readUInt() # offset for ?
+            if self.offset1 != 0:
                 (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
 
     class MESH:
@@ -137,6 +122,7 @@ class NJHM:
 
         for table_entry in self.table_entries:
             mesh = NJHM.MESH()
+            br.seek(table_entry[0].vertex_buffer_offset + header_position, 0)
             mesh.vertices = self.read_vertex(br, table_entry[0].face_count * 3)
             mesh.indices = self.get_indices(table_entry[0].face_count)
             self.meshes.append((mesh, table_entry[1]))
