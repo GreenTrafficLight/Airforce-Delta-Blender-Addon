@@ -110,8 +110,6 @@ class NJHM:
                 transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
                 transformation_table_entry.read(br)
 
-                transformation_table_entries.append(transformation_table_entry)
-
             elif letters == "LAA":
                 transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
                 transformation_table_entry.read(br)
@@ -132,6 +130,10 @@ class NJHM:
         print(br.tell())   
 
         for table_entry in self.table_entries:
+            if table_entry[1] != []:
+                print(str(table_entry[1][-1].unk1) + " " + str(table_entry[1][-1].unk2) + " " + str(table_entry[0].unk1))
+            else:
+                print(table_entry[0].unk1)
             mesh = NJHM.MESH()
             br.seek(table_entry[0].vertex_buffer_offset + header_position, 0)
             mesh.vertices = self.read_vertex(br, table_entry[0].face_count * 3)
