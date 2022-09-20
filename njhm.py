@@ -32,15 +32,6 @@ class NJHM:
             self.unk9 = 0
 
         def read(self, br):
-            """
-            self.unk1 = br.readUInt()
-            if self.unk1 != 8 and self.unk1 != 4:
-                self.offset1 = br.readUInt()
-                if self.offset1 != 0:
-                    self.unk3 = br.readUInt()
-            self.unk4 = br.readUInt()
-            self.unk5 = br.readUInt()
-            """
             self.unk1 = br.readUInt()
             self.offset1 = br.readUInt()
             if self.offset1 != 0:
@@ -68,8 +59,8 @@ class NJHM:
             self.rotation = None
             self.scale = None
             self.offset1 = 0
-            self.offset2 = 0
-            self.offset3 = 0
+            self.child_node_offset = 0
+            self.sibling_node_offset = 0
 
         def read(self, br):
             self.unk1 = br.readInt()
@@ -78,8 +69,8 @@ class NJHM:
             self.rotation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.scale = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.offset1 = br.readUInt() # offset for the 20 unknowns float
-            self.offset2 = br.readUInt() # offset for child node ?
-            self.offset3 = br.readUInt() # offset for ?
+            self.child_node_offset = br.readUInt() # offset for child node
+            self.sibling_node_offset = br.readUInt() # offset for sibling node
             if self.offset1 != 0:
                 (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
 
@@ -100,15 +91,17 @@ class NJHM:
 
         br.seek(header_position, 0)
 
+        root_transformation_table_entry = None
         transformation_table_entries = []
+        meshes_table_entries = []
 
         table_entry = 0
 
         for letters in structure_order:
 
             if letters == "KAA":
-                transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
-                transformation_table_entry.read(br)
+                root_transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
+                root_transformation_table_entry.read(br)
 
             elif letters == "LAA":
                 transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
@@ -116,29 +109,49 @@ class NJHM:
 
                 transformation_table_entries.append(transformation_table_entry)
 
-            elif letters == "V":
-                print(str(table_entry) + " " + "start : " + str(br.tell()))   
-                mesh_table_entry = NJHM.MESH_TABLE_ENTRY()
-                mesh_table_entry.read(br)
-                print(str(table_entry) + " " + "end : " + str(br.tell()))   
-                table_entry += 1
+            elif letters == "G":
+                meshes_table_entries = []
+
+            elif "V" in letters:
+
+                for i in range(len(letters)):
+                    
+                    print(str(table_entry) + " " + "start : " + str(br.tell()))   
+                    mesh_table_entry = NJHM.MESH_TABLE_ENTRY()
+                    mesh_table_entry.read(br)
+                    print(str(table_entry) + " " + "end : " + str(br.tell()))   
+                    table_entry += 1
+                    
+                    meshes_table_entries.append(mesh_table_entry)
                 
-                self.table_entries.append((mesh_table_entry, transformation_table_entries))
+                self.table_entries.append((meshes_table_entries, transformation_table_entries))
 
                 transformation_table_entries = []
     
         print(br.tell())   
 
+        index = 0
+        #parent_node_indices = []
         for table_entry in self.table_entries:
+
             if table_entry[1] != []:
-                print(str(table_entry[1][-1].unk1) + " " + str(table_entry[1][-1].unk2) + " " + str(table_entry[0].unk1))
-            else:
-                print(table_entry[0].unk1)
-            mesh = NJHM.MESH()
-            br.seek(table_entry[0].vertex_buffer_offset + header_position, 0)
-            mesh.vertices = self.read_vertex(br, table_entry[0].face_count * 3)
-            mesh.indices = self.get_indices(table_entry[0].face_count)
-            self.meshes.append((mesh, table_entry[1]))
+                print(str(index) + " : " + str(table_entry[1][-1].offset1) + " " + str(table_entry[1][-1].child_node_offset) + " " + str(table_entry[1][-1].sibling_node_offset) + " " + str(table_entry[1][-1].unk1))
+
+            meshes = []
+
+            for mesh_node in table_entry[0]:
+
+                mesh = NJHM.MESH()
+                br.seek(mesh_node.vertex_buffer_offset + header_position, 0)
+                mesh.vertices = self.read_vertex(br, mesh_node.face_count * 3)
+                mesh.indices = self.get_indices(mesh_node.face_count)
+                meshes.append(mesh)
+
+            self.meshes.append((meshes, table_entry[1]))
+
+            index += 1
+
+            
 
     def get_structure_letters(self, br):
 
@@ -160,10 +173,14 @@ class NJHM:
                 structure_letters = ""
 
             if structure_letters == "G":
+                structure_order.append("G")
                 structure_letters = ""
                 
             if structure_letters == "V":
-                structure_order.append("V")
+                if "V" in structure_order[-1]:
+                    structure_order[-1] += "V"
+                else:
+                    structure_order.append("V")
                 structure_letters = ""
 
         return structure_order

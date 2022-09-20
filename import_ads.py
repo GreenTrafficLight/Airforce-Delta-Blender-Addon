@@ -124,79 +124,80 @@ def build_njhm(njhm, njhm_index):
 
     mesh_index = 0
 
-    for njhm_mesh in njhm.meshes:
+    for mesh_table_entry in njhm.meshes:
 
-        
-        if njhm_mesh[1] != []:
-            empty = add_empty(str(mesh_index), ob, njhm_mesh[1][-1].translation, njhm_mesh[1][-1].rotation, njhm_mesh[1][-1].scale)
-            empty.scale = njhm_mesh[1][-1].scale
-        else:
-            empty = add_empty(str(mesh_index), ob)
-        
-        #empty = add_empty(str(mesh_index), ob)
+        for njhm_mesh in mesh_table_entry[0]:
 
-        mesh = bpy.data.meshes.new(str(mesh_index))
-        obj = bpy.data.objects.new(str(mesh_index), mesh)
-
-        empty.users_collection[0].objects.link(obj)
-
-        obj.parent = empty
-
-        vertexList = {}
-        facesList = []
-        normals = []
-
-        last_vertex_count = 0
-
-        bm = bmesh.new()
-        bm.from_mesh(mesh)
-
-        # Set vertices
-        for j in range(len(njhm_mesh[0].vertices["positions"])):
-            vertex = bm.verts.new(njhm_mesh[0].vertices["positions"][j])
-
-            if njhm_mesh[0].vertices["normals"] != []:
-                vertex.normal = njhm_mesh[0].vertices["normals"][j]
-                normals.append(njhm_mesh[0].vertices["normals"][j])
-                        
-            vertex.index = last_vertex_count + j
-
-            vertexList[last_vertex_count + j] = vertex
-
-        # Set faces
-        for j in range(0, len(njhm_mesh[0].indices)):
-            try:
-                face = bm.faces.new([vertexList[njhm_mesh[0].indices[j][0] + last_vertex_count], vertexList[njhm_mesh[0].indices[j][1] + last_vertex_count], vertexList[njhm_mesh[0].indices[j][2] + last_vertex_count]])
-                face.smooth = True
-                facesList.append([face, [vertexList[njhm_mesh[0].indices[j][0] + last_vertex_count], vertexList[njhm_mesh[0].indices[j][1] + last_vertex_count], vertexList[njhm_mesh[0].indices[j][2]] + last_vertex_count]])
-            except:
-                pass
-
-        if njhm_mesh[0].vertices["uvs"] != []:
-
-            uv_name = "UV1Map"
-            uv_layer1 = bm.loops.layers.uv.get(uv_name) or bm.loops.layers.uv.new(uv_name)
-
-            for f in bm.faces:
-                for l in f.loops:
-                    if l.vert.index >= last_vertex_count:
-                        l[uv_layer1].uv = [njhm_mesh[0].vertices["uvs"][l.vert.index - last_vertex_count][0], 1 - njhm_mesh[0].vertices["uvs"][l.vert.index - last_vertex_count][1]]
+            if mesh_table_entry[1] != []:
+                empty = add_empty(str(mesh_index), ob, mesh_table_entry[1][-1].translation, mesh_table_entry[1][-1].rotation, mesh_table_entry[1][-1].scale)
+                empty.scale = mesh_table_entry[1][-1].scale
+            else:
+                empty = add_empty(str(mesh_index), ob)
             
-        bm.to_mesh(mesh)
-        bm.free()
+            #empty = add_empty(str(mesh_index), ob)
 
-        # Set normals
-        mesh.use_auto_smooth = True
+            mesh = bpy.data.meshes.new(str(mesh_index))
+            obj = bpy.data.objects.new(str(mesh_index), mesh)
 
-        if normals != []:
-            try:
-                mesh.normals_split_custom_set_from_vertices(normals)
-            except:
-                pass
+            empty.users_collection[0].objects.link(obj)
 
-        last_vertex_count += len(njhm_mesh[0].vertices["positions"])
+            obj.parent = empty
 
-        mesh_index += 1
+            vertexList = {}
+            facesList = []
+            normals = []
+
+            last_vertex_count = 0
+
+            bm = bmesh.new()
+            bm.from_mesh(mesh)
+
+            # Set vertices
+            for j in range(len(njhm_mesh.vertices["positions"])):
+                vertex = bm.verts.new(njhm_mesh.vertices["positions"][j])
+
+                if njhm_mesh.vertices["normals"] != []:
+                    vertex.normal = njhm_mesh.vertices["normals"][j]
+                    normals.append(njhm_mesh.vertices["normals"][j])
+                            
+                vertex.index = last_vertex_count + j
+
+                vertexList[last_vertex_count + j] = vertex
+
+            # Set faces
+            for j in range(0, len(njhm_mesh.indices)):
+                try:
+                    face = bm.faces.new([vertexList[njhm_mesh.indices[j][0] + last_vertex_count], vertexList[njhm_mesh.indices[j][1] + last_vertex_count], vertexList[njhm_mesh.indices[j][2] + last_vertex_count]])
+                    face.smooth = True
+                    facesList.append([face, [vertexList[njhm_mesh.indices[j][0] + last_vertex_count], vertexList[njhm_mesh.indices[j][1] + last_vertex_count], vertexList[njhm_mesh.indices[j][2]] + last_vertex_count]])
+                except:
+                    pass
+
+            if njhm_mesh.vertices["uvs"] != []:
+
+                uv_name = "UV1Map"
+                uv_layer1 = bm.loops.layers.uv.get(uv_name) or bm.loops.layers.uv.new(uv_name)
+
+                for f in bm.faces:
+                    for l in f.loops:
+                        if l.vert.index >= last_vertex_count:
+                            l[uv_layer1].uv = [njhm_mesh.vertices["uvs"][l.vert.index - last_vertex_count][0], 1 - njhm_mesh.vertices["uvs"][l.vert.index - last_vertex_count][1]]
+                
+            bm.to_mesh(mesh)
+            bm.free()
+
+            # Set normals
+            mesh.use_auto_smooth = True
+
+            if normals != []:
+                try:
+                    mesh.normals_split_custom_set_from_vertices(normals)
+                except:
+                    pass
+
+            last_vertex_count += len(njhm_mesh.vertices["positions"])
+
+            mesh_index += 1
 
 
 def main(filepath, clear_scene):
