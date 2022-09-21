@@ -116,7 +116,6 @@ def build_njhm(njhm, filename, njhm_index):
 
     bpy.ops.object.add(type="ARMATURE")
     ob = bpy.context.object
-    #ob.rotation_euler = ( radians(90), 0, 0 )
     ob.name = str(filename)
 
     amt = ob.data

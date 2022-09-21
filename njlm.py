@@ -99,7 +99,6 @@ class NJLM:
         indices = []
 
         br.seek(offset, 1)
-        print(br.tell())
         for i in range(count):
             indices.append(br.readUShort())
 
