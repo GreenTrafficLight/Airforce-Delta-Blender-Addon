@@ -13,6 +13,7 @@ class NJHM:
         self.transformations = []
 
         self.meshes = []
+        self.parent_indices = []
 
     class MESH_TABLE_ENTRY:
 
@@ -147,9 +148,58 @@ class NJHM:
                 mesh.indices = self.get_indices(mesh_node.face_count)
                 meshes.append(mesh)
 
+                index += 1
+
             self.meshes.append((meshes, table_entry[1]))
 
-            index += 1
+        parent_node_indices = [-1 for i in range(len(self.meshes))]
+
+        """
+        max_child_offset = 0
+
+        for i in range(len(self.meshes)):
+
+            test = self.meshes[i][1][-1].child_node_offset
+
+            if (test != 0):
+
+                for j in range(len(self.meshes)):
+
+                    if (test < self.meshes[j][1][-1].offset1 and test > max_child_offset):
+
+                        parent_node_indices[j] = i
+                
+                if max_child_offset < test:
+
+                    max_child_offset = test
+
+            print("test")
+
+        print("test2")
+        """
+
+
+        for i in range(len(self.meshes)):
+
+            test = self.meshes[i][1][-1].child_node_offset
+
+            if (test != 0):
+
+                for j in range(len(self.meshes)):
+
+                    if (test < self.meshes[j][1][-1].offset1):
+
+                        parent_node_indices[j] = i
+
+                        if (self.meshes[j][1][-1].sibling_node_offset == 0):
+
+                            break
+                
+        for i in range(len(parent_node_indices)):
+
+            print(parent_node_indices[i])
+
+            
 
             
 
