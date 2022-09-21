@@ -15,7 +15,7 @@ class POF0:
         self.njtl_list = []
         self.njlm_list = []
         self.njhm_list = []
-    def read(self, br):
+    def read(self, br, xbox_version = False):
 
         self.header_size = br.readUInt()
         header_position = br.tell()
@@ -40,7 +40,7 @@ class POF0:
 
         elif subheader == "NJHM":
             njhm = NJHM()
-            njhm.read(br)
+            njhm.read(br, xbox_version)
             self.njhm_list.append(njhm)
             
                 

@@ -11,7 +11,7 @@ class NNMH:
 
         self.pof0_list = []
 
-    def read(self, br, file_size):
+    def read(self, br, file_size, xbox_version = False):
 
         self.header_size = br.readUInt()
         header_position = br.tell()
@@ -28,7 +28,7 @@ class NNMH:
 
             if subheader == "POF0":
                 pof0 = POF0()
-                pof0.read(br)
+                pof0.read(br, xbox_version)
                 self.pof0_list.append(pof0)
 
             #print(br.tell())

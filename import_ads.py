@@ -9,6 +9,7 @@ from math import *
 from mathutils import *
 
 from .nnmh import *
+from .kap import *
 
 from .Utilities import *
 from .Blender import*
@@ -231,8 +232,25 @@ def main(filepath, files, clear_scene):
 
             if header == "NNMH":
 
-                nnhm = NNMH()
-                nnhm.read(br, file_size)
-                build_nnhm(nnhm, os.path.splitext(filename)[0])
+                nnmh = NNMH()
+                nnmh.read(br, file_size)
+                build_nnhm(nnmh, os.path.splitext(filename)[0])
+
+        elif file_extension == ".kap":
+
+            kap = KAP()
+            kap.read(br)
+
+            for table_entry in kap.table_entries:
+
+                br.seek(table_entry.offset)
+
+                if table_entry.header == "SK":
+                    header = br.bytesToString(br.readBytes(4)).replace("\0", "")
+                    nnmh = NNMH()
+                    nnmh.read(br, br.tell() + table_entry.size, True)
+                    build_nnhm(nnmh, table_entry.name)
+
+                    break
 
     

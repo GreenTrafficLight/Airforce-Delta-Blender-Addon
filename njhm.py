@@ -83,7 +83,7 @@ class NJHM:
             self.vertices = None
             self.indices = []
 
-    def read(self, br):
+    def read(self, br, xbox_version = False):
         
         self.size = br.readUInt()
         header_position = br.tell()
@@ -121,10 +121,10 @@ class NJHM:
 
                 for i in range(len(letters)):
                     
-                    #print(str(table_entry) + " " + "start : " + str(br.tell()))   
+                    print(str(table_entry) + " " + "start : " + str(br.tell()))   
                     mesh_table_entry = NJHM.MESH_TABLE_ENTRY()
                     mesh_table_entry.read(br)
-                    #print(str(table_entry) + " " + "end : " + str(br.tell()))   
+                    print(str(table_entry) + " " + "end : " + str(br.tell()))   
                          
                     meshes_table_entries.append(mesh_table_entry)
                 
@@ -132,7 +132,7 @@ class NJHM:
                 
                 self.table_entries.append((meshes_table_entries, transformation_index))
     
-        #print(br.tell())   
+        print(br.tell())   
 
         index = 0
 
@@ -145,7 +145,7 @@ class NJHM:
                 mesh = NJHM.MESH()
                 br.seek(mesh_node.vertex_buffer_offset + header_position, 0)
                 mesh.vertices = self.read_vertex(br, mesh_node.face_count * 3)
-                mesh.indices = self.get_indices(mesh_node.face_count)
+                mesh.indices = self.get_indices(mesh_node.face_count, xbox_version)
                 meshes.append(mesh)
 
             index += 1
@@ -228,13 +228,16 @@ class NJHM:
 
         return vertices
 
-    def get_indices(self, count):
+    def get_indices(self, count, xbox_version = False):
 
         indices = []
 
         face_index = 0
         for i in range(count):
-            indices.append([face_index, face_index+1, face_index+2])
+            if xbox_version:
+                indices.append([face_index+1, face_index, face_index+2])
+            else:
+                indices.append([face_index, face_index+1, face_index+2])
             face_index += 3
 
         return indices
