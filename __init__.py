@@ -14,7 +14,7 @@ bl_info = {
 import bpy
 
 from bpy_extras.io_utils import ImportHelper
-from bpy.props import StringProperty, BoolProperty, EnumProperty
+from bpy.props import StringProperty, BoolProperty, EnumProperty, CollectionProperty
 from bpy.types import Operator
 
 class ImportAirforceDeltaStrike(Operator, ImportHelper):
@@ -25,6 +25,9 @@ class ImportAirforceDeltaStrike(Operator, ImportHelper):
     filename_ext = ".nj"
     filter_glob: StringProperty(default="*.nj", options={'HIDDEN'}, maxlen=255,)
 
+    # Selected files
+    files: CollectionProperty(type=bpy.types.PropertyGroup)
+
     clear_scene: BoolProperty(
         name="Clear scene",
         description="Clear everything from the scene",
@@ -33,7 +36,7 @@ class ImportAirforceDeltaStrike(Operator, ImportHelper):
 
     def execute(self, context):
         from . import  import_ads
-        import_ads.main(self.filepath, self.clear_scene)
+        import_ads.main(self.filepath, self.files, self.clear_scene)
         return {'FINISHED'}
 
 def menu_func_import(self, context):

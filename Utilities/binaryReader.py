@@ -65,17 +65,21 @@ class BinaryReader:
     def readDouble(self):
         return struct.unpack(self.endian + "d", self.read(8))[0]
 
+
     def readString(self, encoding="utf-8"):
-        bytes = []
+        string = ""
 
         while True:
-            character = self.read(1)
+            character = self.readChar()
             if character == b"\x00":
                 break
             else:
-                bytes.append(character)
+                try:
+                    string += str(character, encoding)
+                except:
+                    pass
 
-        return b''.join(bytes).decode(encoding)
+        return string
 
     def bytesToString(self, byteArray, encoding="utf-8"):
         try:

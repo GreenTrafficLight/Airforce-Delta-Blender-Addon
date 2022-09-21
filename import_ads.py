@@ -13,7 +13,7 @@ from .nnmh import *
 from .Utilities import *
 from .Blender import*
 
-def build_nnhm(nnhm):
+def build_nnhm(nnhm, filename):
 
     for pof0 in nnhm.pof0_list:
 
@@ -21,25 +21,25 @@ def build_nnhm(nnhm):
 
         for njlm in pof0.njlm_list:
 
-            build_njlm(njlm, index)
+            build_njlm(njlm, filename, index)
 
             index += 1
 
         for njhm in pof0.njhm_list:
 
-            build_njhm(njhm, index)
+            build_njhm(njhm, filename, index)
 
             index +=1
 
-def build_njlm(njlm, njlm_index):
+def build_njlm(njlm, filename, njlm_index):
 
     bpy.ops.object.add(type="ARMATURE")
     ob = bpy.context.object
     ob.rotation_euler = ( radians(90), 0, 0 )
-    ob.name = str(njlm_index)
+    ob.name = str(filename)
 
     amt = ob.data
-    amt.name = str(njlm_index)
+    amt.name = str(filename)
 
     mesh_index = 0
 
@@ -112,15 +112,30 @@ def build_njlm(njlm, njlm_index):
 
         mesh_index += 1
 
-def build_njhm(njhm, njhm_index):
+def build_njhm(njhm, filename, njhm_index):
 
     bpy.ops.object.add(type="ARMATURE")
     ob = bpy.context.object
     #ob.rotation_euler = ( radians(90), 0, 0 )
-    ob.name = str(njhm_index)
+    ob.name = str(filename)
 
     amt = ob.data
-    amt.name = str(njhm_index)
+    amt.name = str(filename)
+
+    empty_list = []
+
+    for i in range(len(njhm.transformations)):
+
+        transformation = njhm.transformations[i]
+        
+        empty = add_empty(str(i), ob, transformation.translation, transformation.rotation, transformation.scale)
+        empty.scale = transformation.scale
+        
+        if njhm.parent_indices[i] != -1:
+
+            empty.parent = empty_list[njhm.parent_indices[i]]
+
+        empty_list.append(empty)
 
     mesh_index = 0
 
@@ -128,16 +143,10 @@ def build_njhm(njhm, njhm_index):
 
         for njhm_mesh in mesh_table_entry[0]:
 
-            if mesh_table_entry[1] != []:
-                empty = add_empty(str(mesh_index), ob, mesh_table_entry[1][-1].translation, mesh_table_entry[1][-1].rotation, mesh_table_entry[1][-1].scale)
-                empty.scale = mesh_table_entry[1][-1].scale
-            else:
-                empty = add_empty(str(mesh_index), ob)
+            empty = empty_list[mesh_table_entry[1]]
             
-            #empty = add_empty(str(mesh_index), ob)
-
-            mesh = bpy.data.meshes.new(str(mesh_index))
-            obj = bpy.data.objects.new(str(mesh_index), mesh)
+            mesh = bpy.data.meshes.new(str(mesh_table_entry[1]))
+            obj = bpy.data.objects.new(str(mesh_table_entry[1]), mesh)
 
             empty.users_collection[0].objects.link(obj)
 
@@ -197,28 +206,34 @@ def build_njhm(njhm, njhm_index):
 
             last_vertex_count += len(njhm_mesh.vertices["positions"])
 
-            mesh_index += 1
+        mesh_index += 1
 
 
-def main(filepath, clear_scene):
+def main(filepath, files, clear_scene):
     if clear_scene:
         clearScene()
 
-    file = open(filepath, 'rb')
-    filename =  filepath.split("\\")[-1]
-    file_extension =  os.path.splitext(filepath)[1]
-    file_size = os.path.getsize(filepath)
+    folder = (os.path.dirname(filepath))
 
-    br = BinaryReader(file, "<")
+    for i, j in enumerate(files):
 
-    if file_extension == ".nj":
+        path_to_file = (os.path.join(folder, j.name))
 
-        header = br.bytesToString(br.readBytes(4)).replace("\0", "")
+        file = open(path_to_file, 'rb')
+        filename =  path_to_file.split("\\")[-1]
+        file_extension =  os.path.splitext(path_to_file)[1]
+        file_size = os.path.getsize(path_to_file)
 
-        if header == "NNMH":
+        br = BinaryReader(file, "<")
 
-            nnhm = NNMH()
-            nnhm.read(br, file_size)
-            build_nnhm(nnhm)
+        if file_extension == ".nj":
+
+            header = br.bytesToString(br.readBytes(4)).replace("\0", "")
+
+            if header == "NNMH":
+
+                nnhm = NNMH()
+                nnhm.read(br, file_size)
+                build_nnhm(nnhm, os.path.splitext(filename)[0])
 
     

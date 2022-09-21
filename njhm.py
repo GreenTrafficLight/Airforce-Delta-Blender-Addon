@@ -35,12 +35,12 @@ class NJHM:
         def read(self, br):
             self.unk1 = br.readUInt()
             self.offset1 = br.readUInt()
-            if self.offset1 != 0:
+            if self.offset1 == 0 or self.offset1 == 1:
+                self.unk3 = br.readUInt()
+            else :
                 self.unk3 = br.readUInt()
                 self.unk4 = br.readUInt()
                 self.unk5 = br.readUInt()
-            elif self.offset1 == 0:
-                self.unk3 = br.readUInt()
             self.unk6 = (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
             self.unk7 = (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
             self.unk8 = (br.readFloat(), br.readFloat(), br.readFloat(), br.readFloat())
@@ -63,7 +63,8 @@ class NJHM:
             self.child_node_offset = 0
             self.sibling_node_offset = 0
 
-        def read(self, br):
+        def read(self, br, header_position):
+            self.node_offset = br.tell() - header_position
             self.unk1 = br.readInt()
             self.unk2 = br.readUInt()
             self.translation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
@@ -93,22 +94,25 @@ class NJHM:
         br.seek(header_position, 0)
 
         root_transformation_table_entry = None
-        transformation_table_entries = []
         meshes_table_entries = []
 
         table_entry = 0
+
+        transformation_index = -1
 
         for letters in structure_order:
 
             if letters == "KAA":
                 root_transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
-                root_transformation_table_entry.read(br)
+                root_transformation_table_entry.read(br, header_position)
 
             elif letters == "LAA":
                 transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
-                transformation_table_entry.read(br)
+                transformation_table_entry.read(br, header_position)
 
-                transformation_table_entries.append(transformation_table_entry)
+                self.transformations.append(transformation_table_entry)
+
+                transformation_index += 1
 
             elif letters == "G":
                 meshes_table_entries = []
@@ -121,23 +125,19 @@ class NJHM:
                     mesh_table_entry = NJHM.MESH_TABLE_ENTRY()
                     mesh_table_entry.read(br)
                     print(str(table_entry) + " " + "end : " + str(br.tell()))   
-                    table_entry += 1
-                    
+                         
                     meshes_table_entries.append(mesh_table_entry)
                 
-                self.table_entries.append((meshes_table_entries, transformation_table_entries))
-
-                transformation_table_entries = []
+                table_entry += 1
+                
+                self.table_entries.append((meshes_table_entries, transformation_index))
     
         print(br.tell())   
 
         index = 0
-        #parent_node_indices = []
+
         for table_entry in self.table_entries:
-
-            if table_entry[1] != []:
-                print(str(index) + " : " + str(table_entry[1][-1].offset1) + " " + str(table_entry[1][-1].child_node_offset) + " " + str(table_entry[1][-1].sibling_node_offset) + " " + str(table_entry[1][-1].unk1))
-
+            
             meshes = []
 
             for mesh_node in table_entry[0]:
@@ -148,56 +148,39 @@ class NJHM:
                 mesh.indices = self.get_indices(mesh_node.face_count)
                 meshes.append(mesh)
 
-                index += 1
+            index += 1
 
             self.meshes.append((meshes, table_entry[1]))
 
-        parent_node_indices = [-1 for i in range(len(self.meshes))]
+        for i in range(len(self.transformations)):
 
-        """
-        max_child_offset = 0
+            print(str(i) + " : " + str(self.transformations[i].node_offset) + " " + str(self.transformations[i].child_node_offset) + " " + str(self.transformations[i].sibling_node_offset) + " " + str(self.transformations[i].unk1))
 
-        for i in range(len(self.meshes)):
+        self.parent_indices = [-1 for i in range(len(self.transformations))]
 
-            test = self.meshes[i][1][-1].child_node_offset
+        for i in range(len(self.transformations)):
 
-            if (test != 0):
+            child_node_offset = self.transformations[i].child_node_offset
 
-                for j in range(len(self.meshes)):
+            # Node has child, replace parent indices
 
-                    if (test < self.meshes[j][1][-1].offset1 and test > max_child_offset):
+            if (child_node_offset != 0):
 
-                        parent_node_indices[j] = i
-                
-                if max_child_offset < test:
+                for j in range(len(self.transformations)): # 
 
-                    max_child_offset = test
+                    #
 
-            print("test")
+                    if (child_node_offset <= self.transformations[j].node_offset):
 
-        print("test2")
-        """
+                        self.parent_indices[j] = i
 
+                        #
 
-        for i in range(len(self.meshes)):
-
-            test = self.meshes[i][1][-1].child_node_offset
-
-            if (test != 0):
-
-                for j in range(len(self.meshes)):
-
-                    if (test < self.meshes[j][1][-1].offset1):
-
-                        parent_node_indices[j] = i
-
-                        if (self.meshes[j][1][-1].sibling_node_offset == 0):
+                        if (self.transformations[j].sibling_node_offset == 0):
 
                             break
-                
-        for i in range(len(parent_node_indices)):
 
-            print(parent_node_indices[i])
+        print("test")
 
             
 
