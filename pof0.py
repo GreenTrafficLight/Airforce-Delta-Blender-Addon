@@ -35,7 +35,7 @@ class POF0:
         
         elif subheader == "NJLM":
             njlm = NJLM()
-            njlm.read(br)
+            njlm.read(br, xbox_version)
             self.njlm_list.append(njlm)
 
         elif subheader == "NJHM":

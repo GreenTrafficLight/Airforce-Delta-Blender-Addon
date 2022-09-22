@@ -1,10 +1,10 @@
 bl_info = {
-	"name": "Import Airforce Delta Strik Models format",
-	"description": "Import Airforce Delta Strike Model",
+	"name": "Import Airforce Delta Models format",
+	"description": "Import Airforce Delta Model",
 	"author": "GreenTrafficLight",
 	"version": (1, 0),
 	"blender": (2, 92, 0),
-	"location": "File > Import > Airforce Delta Strik Importer",
+	"location": "File > Import > Airforce Delta Importer",
 	"warning": "",
 	"wiki_url": "",
 	"tracker_url": "",
@@ -17,10 +17,10 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty, BoolProperty, EnumProperty, CollectionProperty
 from bpy.types import Operator
 
-class ImportAirforceDeltaStrike(Operator, ImportHelper):
-    """Load a Airforce Delta Strike model file"""
+class ImportAirforceDelta(Operator, ImportHelper):
+    """Load a Airforce Delta model file"""
     bl_idname = "import_scene.ads_data"
-    bl_label = "Import Airforce Delta Strike Data"
+    bl_label = "Import Airforce Delta Data"
 
     filename_ext = ".nj;.kap"
     filter_glob: StringProperty(default="*.nj;*.kap", options={'HIDDEN'}, maxlen=255,)
@@ -40,16 +40,16 @@ class ImportAirforceDeltaStrike(Operator, ImportHelper):
         return {'FINISHED'}
 
 def menu_func_import(self, context):
-    self.layout.operator(ImportAirforceDeltaStrike.bl_idname, text="Airforce Delta Strike")
+    self.layout.operator(ImportAirforceDelta.bl_idname, text="Airforce Delta")
 
 
 def register():
-    bpy.utils.register_class(ImportAirforceDeltaStrike)
+    bpy.utils.register_class(ImportAirforceDelta)
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
 
 def unregister():
-    bpy.utils.unregister_class(ImportAirforceDeltaStrike)
+    bpy.utils.unregister_class(ImportAirforceDelta)
     bpy.types.TOPBAR_MT_file_import.remove(menu_func_import)
 
 

@@ -1,6 +1,9 @@
 from mathutils import *
+from math import *
 
 from .Utilities import *
+
+
 
 class NJHM:
 
@@ -63,12 +66,15 @@ class NJHM:
             self.child_node_offset = 0
             self.sibling_node_offset = 0
 
-        def read(self, br, header_position):
+        def read(self, br, header_position, xbox_version = False):
             self.node_offset = br.tell() - header_position
             self.unk1 = br.readInt()
             self.unk2 = br.readUInt()
             self.translation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
-            self.rotation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
+            if xbox_version:
+                self.rotation = Vector((radians(br.readInt() / 182.044), radians(br.readInt() / 182.044), radians(br.readInt() / 182.044)))
+            else:
+                self.rotation = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.scale = Vector((br.readFloat(), br.readFloat(), br.readFloat()))
             self.offset1 = br.readUInt() # offset for the 20 unknowns float
             self.child_node_offset = br.readUInt() # offset for child node
@@ -104,11 +110,11 @@ class NJHM:
 
             if letters == "KAA":
                 root_transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
-                root_transformation_table_entry.read(br, header_position)
+                root_transformation_table_entry.read(br, header_position, xbox_version)
 
             elif letters == "LAA":
                 transformation_table_entry = NJHM.TRANSFORMATION_TABLE_ENTRY()
-                transformation_table_entry.read(br, header_position)
+                transformation_table_entry.read(br, header_position, xbox_version)
 
                 self.transformations.append(transformation_table_entry)
 
@@ -151,6 +157,10 @@ class NJHM:
             index += 1
 
             self.meshes.append((meshes, table_entry[1]))
+
+        for i in range(len(self.transformations)):
+
+            print(str(i) + " : " + str(self.transformations[i].node_offset) + " " + str(self.transformations[i].child_node_offset) + " " + str(self.transformations[i].sibling_node_offset) + " " + str(self.transformations[i].unk1))
 
         self.parent_indices = [-1 for i in range(len(self.transformations))]
 
@@ -235,7 +245,7 @@ class NJHM:
         face_index = 0
         for i in range(count):
             if xbox_version:
-                indices.append([face_index+1, face_index, face_index+2])
+                indices.append([face_index+2, face_index+1, face_index])
             else:
                 indices.append([face_index, face_index+1, face_index+2])
             face_index += 3

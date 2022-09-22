@@ -45,7 +45,7 @@ class NJLM:
             self.vertices = None
             self.indices = []
 
-    def read(self, br):
+    def read(self, br, xbox_version = False):
         self.size = br.readUInt()
         header_position = br.tell()
         br.readBytes(112)
@@ -66,7 +66,7 @@ class NJLM:
             br.seek(vertex_buffer_offset + header_position, 0)
             mesh.vertices = self.read_vertex(br, table_entry.vertex_count)
             br.seek(face_buffer_offset + header_position, 0)
-            mesh.indices = self.read_indices(br, table_entry.face_buffer_offset, table_entry.face_count)
+            mesh.indices = self.read_indices(br, table_entry.face_buffer_offset, table_entry.face_count, xbox_version)
             self.meshes.append(mesh)
 
         br.seek(header_position + self.size, 0)
@@ -94,13 +94,18 @@ class NJLM:
 
         return vertices
 
-    def read_indices(self, br, offset, count):
+    def read_indices(self, br, offset, count, xbox_version = False):
 
         indices = []
 
         br.seek(offset, 1)
         for i in range(count):
             indices.append(br.readUShort())
+
+        if xbox_version:
+            indices = StripToTriangle(indices, True)
+        else:
+            indices = StripToTriangle(indices)
 
         return indices
 

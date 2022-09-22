@@ -1,4 +1,4 @@
-def StripToTriangle(triangleStripList):
+def StripToTriangle(triangleStripList, reverse_face_winding = False):
     faces = []
     cte = 0
     for i in range(2, len(triangleStripList)):
@@ -19,7 +19,11 @@ def StripToTriangle(triangleStripList):
                 c = triangleStripList[i]
 
             if a != b and b != c and c != a:
-                faces.append([a, b, c])
+                if reverse_face_winding:
+                    faces.append([c, b, a])
+                else: 
+                    faces.append([a, b, c])
+
     return faces
 
 def ToTriangle(triangleList):

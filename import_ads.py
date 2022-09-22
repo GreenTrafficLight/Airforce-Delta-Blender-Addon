@@ -14,7 +14,7 @@ from .kap import *
 from .Utilities import *
 from .Blender import*
 
-def build_nnhm(nnhm, filename):
+def build_nnhm(nnhm, filename, rotate = False):
 
     for pof0 in nnhm.pof0_list:
 
@@ -28,7 +28,7 @@ def build_nnhm(nnhm, filename):
 
         for njhm in pof0.njhm_list:
 
-            build_njhm(njhm, filename, index)
+            build_njhm(njhm, filename, index, rotate)
 
             index +=1
 
@@ -76,14 +76,12 @@ def build_njlm(njlm, filename, njlm_index):
 
             vertexList[last_vertex_count + j] = vertex
 
-        faces = StripToTriangle(njlm_mesh.indices)
-
         # Set faces
-        for j in range(0, len(faces)):
+        for j in range(0, len(njlm_mesh.indices)):
             try:
-                face = bm.faces.new([vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2] + last_vertex_count]])
+                face = bm.faces.new([vertexList[njlm_mesh.indices[j][0] + last_vertex_count], vertexList[njlm_mesh.indices[j][1] + last_vertex_count], vertexList[njlm_mesh.indices[j][2] + last_vertex_count]])
                 face.smooth = True
-                facesList.append([face, [vertexList[faces[j][0] + last_vertex_count], vertexList[faces[j][1] + last_vertex_count], vertexList[faces[j][2]] + last_vertex_count]])
+                facesList.append([face, [vertexList[njlm_mesh.indices[j][0] + last_vertex_count], vertexList[njlm_mesh.indices[j][1] + last_vertex_count], vertexList[njlm_mesh.indices[j][2]] + last_vertex_count]])
             except:
                 pass
 
@@ -113,10 +111,12 @@ def build_njlm(njlm, filename, njlm_index):
 
         mesh_index += 1
 
-def build_njhm(njhm, filename, njhm_index):
+def build_njhm(njhm, filename, njhm_index, rotate = False):
 
     bpy.ops.object.add(type="ARMATURE")
     ob = bpy.context.object
+    if rotate:
+        ob.rotation_euler = ( radians(90), 0, 0 )
     ob.name = str(filename)
 
     amt = ob.data
@@ -249,8 +249,9 @@ def main(filepath, files, clear_scene):
                     header = br.bytesToString(br.readBytes(4)).replace("\0", "")
                     nnmh = NNMH()
                     nnmh.read(br, br.tell() + table_entry.size, True)
-                    build_nnhm(nnmh, table_entry.name)
-
-                    break
+                    if table_entry.index == 1:
+                        build_nnhm(nnmh, table_entry.name, True)
+                    else:
+                        build_nnhm(nnmh, table_entry.name)
 
     
