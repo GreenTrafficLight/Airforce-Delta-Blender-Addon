@@ -248,7 +248,7 @@ def main(filepath, files, clear_scene):
                 if table_entry.header == "SK":
                     header = br.bytesToString(br.readBytes(4)).replace("\0", "")
                     nnmh = NNMH()
-                    nnmh.read(br, br.tell() + table_entry.size, True)
+                    nnmh.read(br, br.tell() + table_entry.size - 4, True)
                     if table_entry.index == 1:
                         build_nnhm(nnmh, table_entry.name, True)
                     else:

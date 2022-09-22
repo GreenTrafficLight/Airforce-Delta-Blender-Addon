@@ -127,10 +127,10 @@ class NJHM:
 
                 for i in range(len(letters)):
                     
-                    print(str(table_entry) + " " + "start : " + str(br.tell()))   
+                    #print(str(table_entry) + " " + "start : " + str(br.tell()))   
                     mesh_table_entry = NJHM.MESH_TABLE_ENTRY()
                     mesh_table_entry.read(br)
-                    print(str(table_entry) + " " + "end : " + str(br.tell()))   
+                    #print(str(table_entry) + " " + "end : " + str(br.tell()))   
                          
                     meshes_table_entries.append(mesh_table_entry)
                 
@@ -138,7 +138,7 @@ class NJHM:
                 
                 self.table_entries.append((meshes_table_entries, transformation_index))
     
-        print(br.tell())   
+        #print(br.tell())   
 
         index = 0
 
@@ -157,10 +157,6 @@ class NJHM:
             index += 1
 
             self.meshes.append((meshes, table_entry[1]))
-
-        for i in range(len(self.transformations)):
-
-            print(str(i) + " : " + str(self.transformations[i].node_offset) + " " + str(self.transformations[i].child_node_offset) + " " + str(self.transformations[i].sibling_node_offset) + " " + str(self.transformations[i].unk1))
 
         self.parent_indices = [-1 for i in range(len(self.transformations))]
 
