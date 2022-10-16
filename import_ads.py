@@ -1,15 +1,14 @@
 import bpy
 import bmesh
 
-import gzip
 import os
-import struct
 
 from math import *
 from mathutils import *
 
 from .nnmh import *
 from .kap import *
+from .njvr import *
 
 from .Utilities import *
 from .Blender import*
@@ -235,6 +234,17 @@ def main(filepath, files, clear_scene):
                 nnmh = NNMH()
                 nnmh.read(br, file_size)
                 build_nnhm(nnmh, os.path.splitext(filename)[0])
+
+        elif file_extension == ".cdp":
+
+            header = br.bytesToString(br.readBytes(4)).replace("\0", "")
+
+            if header == "NJVR":
+
+                njvr = NJVR()
+                njvr.read(br)
+
+
 
         elif file_extension == ".kap":
 
