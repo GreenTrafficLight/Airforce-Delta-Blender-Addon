@@ -22,7 +22,7 @@ class NNMH:
 
         br.seek(header_position + self.header_size, 0)
 
-        while br.tell() < file_size:
+        while br.tell() < header_position - 8 + self.size:
 
             subheader = br.bytesToString(br.readBytes(4)).replace("\0", "")
 

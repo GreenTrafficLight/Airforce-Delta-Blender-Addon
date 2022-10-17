@@ -22,8 +22,8 @@ class ImportAirforceDelta(Operator, ImportHelper):
     bl_idname = "import_scene.ads_data"
     bl_label = "Import Airforce Delta Data"
 
-    filename_ext = ".nj;.kap"
-    filter_glob: StringProperty(default="*.nj;*.kap", options={'HIDDEN'}, maxlen=255,)
+    filename_ext = ".nj;.kap;.cdb"
+    filter_glob: StringProperty(default="*.nj;*.kap;*.cdb", options={'HIDDEN'}, maxlen=255,)
 
     # Selected files
     files: CollectionProperty(type=bpy.types.PropertyGroup)

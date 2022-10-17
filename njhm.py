@@ -38,7 +38,7 @@ class NJHM:
         def read(self, br):
             self.unk1 = br.readUInt()
             self.offset1 = br.readUInt()
-            if self.offset1 == 0 or self.offset1 == 1:
+            if self.offset1 == 0 or self.offset1 == 1 or self.offset1 == 2:
                 self.unk3 = br.readUInt()
             else :
                 self.unk3 = br.readUInt()

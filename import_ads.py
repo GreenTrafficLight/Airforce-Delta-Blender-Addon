@@ -235,14 +235,16 @@ def main(filepath, files, clear_scene):
                 nnmh.read(br, file_size)
                 build_nnhm(nnmh, os.path.splitext(filename)[0])
 
-        elif file_extension == ".cdp":
+        elif file_extension == ".cdb":
 
             header = br.bytesToString(br.readBytes(4)).replace("\0", "")
 
             if header == "NJVR":
 
                 njvr = NJVR()
-                njvr.read(br)
+                njvr.read(br, file_size)
+                for i in range(len(njvr.nnmhs)):
+                    build_nnhm(njvr.nnmhs[i], filename + "_" + str(i))
 
 
 
